@@ -7,9 +7,9 @@
 //
 
 typedef enum {
-  AYSlidingPickerViewShownState,
-  AYSlidingPickerViewClosedState,
-  AYSlidingPickerViewDisplayingState
+    AYSlidingPickerViewShownState,
+    AYSlidingPickerViewClosedState,
+    AYSlidingPickerViewDisplayingState
 } AYSlidingPickerViewState;
 
 @interface AYSlidingPickerViewItem : NSObject
@@ -24,6 +24,10 @@ typedef enum {
  *  String to be displayed in the picker view.
  */
 @property (copy, nonatomic) NSString *title;
+/**
+ *  Image to be displayed in the picker view.
+ */
+@property (copy, nonatomic) UIImage *image;
 
 #pragma mark Methods
 
@@ -37,6 +41,18 @@ typedef enum {
  */
 - (AYSlidingPickerViewItem *)initWithTitle:(NSString *)title handler:(void (^)(BOOL completed))handler;
 
+/**
+ *  Creates an item for the picker view with the specified title, image and handler.
+ *
+ *  @param title   String to be displayed in the picker view.
+ *  @param image   Image to be displayed in the picker view.
+ *  @param handler Action to be performed on selection.
+ *
+ *  @return Newly created picker view item.
+ */
+- (AYSlidingPickerViewItem *)initWithTitle:(NSString *)title image:(UIImage *)image handler:(void (^)(BOOL completed))handler;
+
+
 @end
 
 @interface AYSlidingPickerView : UIView <UIPickerViewDelegate, UIPickerViewDataSource>
@@ -44,9 +60,13 @@ typedef enum {
 #pragma mark Properties
 
 /**
+ *  Indicates how many items should be visible, influences height of the AYSlidingPickerView.
+ */
+@property (nonatomic, assign) NSInteger numberOfVisibleItems;
+/**
  *  Indicates whether or not the picker view should be closed on selection of an item.
  */
-@property (nonatomic) BOOL closeOnSelection;
+@property (nonatomic, assign) BOOL closeOnSelection;
 /**
  *  Array of AYSlidingPickerViewItem objects providing data for the picker view.
  */
@@ -56,13 +76,26 @@ typedef enum {
  */
 @property (nonatomic) NSUInteger selectedIndex;
 /**
- *  Color for the item labels in the picker view.
- */
-@property (nonatomic) UIColor *itemColor;
-/**
  *  Font for the item labels in the picker view.
  */
 @property (nonatomic) UIFont *itemFont;
+
+/**
+ *  Color for the item labels in the picker view.
+ */
+@property (nonatomic) UIColor *itemLabelColor;
+/**
+ *  Color for the item labels in the picker view.
+ */
+@property (nonatomic) UIColor *itemImageColor;
+///**
+// *  Color for the selected item labels in the picker view.
+// */
+//@property (nonatomic) UIColor *selectedItemLabelColor;
+///**
+// *  Color for the selected item labels in the picker view.sel
+// */
+//@property (nonatomic) UIColor *selectedItemImageColor;
 /**
  *  Current visible view in the window. Must be specified before showing the picker view.
  */
