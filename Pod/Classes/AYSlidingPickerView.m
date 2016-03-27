@@ -8,6 +8,7 @@
 
 #import "AYSlidingPickerView.h"
 
+static CGFloat const kSlidingPickerViewExtraTopPadding = 8;
 static CGFloat const kSlidingPickerViewBounceOffset = 10;
 static CGFloat const kSlidingPickerViewVelocityThreshold = 1000;
 static CGFloat const kSlidingPickerViewClosingVelocity = 1200;
@@ -57,19 +58,23 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
 
 #pragma mark Initialization
 
-- (instancetype)init
+-(instancetype)init
+{
+    return [self initWithNumberOfVisibleItems:5];
+}
+
+- (instancetype)initWithNumberOfVisibleItems:(NSUInteger)numberOfVisibleItems
 {
     self = [super init];
     if (!self) {
         return nil;
     }
     
-    self.numberOfVisibleItems = 5;
-    self.frame = CGRectMake(0, 0, CGRectGetWidth([UIScreen mainScreen].bounds), kSlidingPickerViewItemHeight * self.numberOfVisibleItems + CGRectGetHeight([UIApplication sharedApplication].statusBarFrame) + kSlidingPickerViewBounceOffset);
+    self.frame = CGRectMake(0, 0, CGRectGetWidth([UIScreen mainScreen].bounds), kSlidingPickerViewItemHeight * numberOfVisibleItems + CGRectGetHeight([UIApplication sharedApplication].statusBarFrame) + kSlidingPickerViewBounceOffset + kSlidingPickerViewExtraTopPadding);
     self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     
     self.backgroundColor = [UIColor colorWithRed:0.93f green:0.94f blue:0.95f alpha:1];
-    self.pickerView = [[UIPickerView alloc] initWithFrame:self.bounds];
+    self.pickerView = [[UIPickerView alloc] initWithFrame:CGRectMake(0, kSlidingPickerViewExtraTopPadding, CGRectGetWidth(self.bounds), CGRectGetHeight(self.bounds) - kSlidingPickerViewExtraTopPadding)];
     self.pickerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.pickerView.delegate = self;
     self.pickerView.dataSource = self;
@@ -78,8 +83,6 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
     [self addSubview:self.pickerView];
     
     self.itemFont = [UIFont systemFontOfSize:[UIFont buttonFontSize]];
-//    self.selectedItemImageColor = [UIColor blackColor];
-//    self.selectedItemLabelColor = [UIColor blackColor];
     self.itemLabelColor = [UIColor darkGrayColor];
     self.itemImageColor = [UIColor darkGrayColor];
     
@@ -159,17 +162,6 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
     [self.pickerView reloadAllComponents];
 }
 
-//- (void)setSelectedItemImageColor:(UIColor *)selectedItemImageColor
-//{
-//    _selectedItemImageColor = selectedItemImageColor;
-//    [self.pickerView reloadAllComponents];
-//}
-//
-//- (void)setSelectedItemLabelColor:(UIColor *)selectedItemLabelColor {
-//    _selectedItemLabelColor = selectedItemLabelColor;
-//    [self.pickerView reloadAllComponents];
-//}
-
 - (void)setMainView:(UIView *)mainView {
     _mainView = mainView;
     self.state = AYSlidingPickerViewClosedState;
@@ -181,7 +173,7 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
 }
 
 - (void)setSelectedIndex:(NSUInteger)selectedIndex {
-//    _selectedIndex = selectedIndex; //getter handles that
+    //    _selectedIndex = selectedIndex; //getter handles that
     [self.pickerView selectRow:(NSInteger)selectedIndex inComponent:0 animated:NO];
 }
 
@@ -424,7 +416,7 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
     CGFloat imageViewInsets = 2.0f;
     
     BOOL selected = (self.selectedIndex == row);
-
+    
     UIImageView *imageView;
     UILabel *label;
     
@@ -445,7 +437,6 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
         [view addSubview:label];
         
     } else {
-
         for (UIView *v in view.subviews) {
             if(v.tag == 1) {
                 imageView = (UIImageView *)v;
@@ -460,9 +451,7 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
     
     AYSlidingPickerViewItem *item = (AYSlidingPickerViewItem *)self.items[(NSUInteger)row];
     imageView.image = item.image;
-//    imageView.tintColor = (selected ? self.selectedItemImageColor : self.itemImageColor );
     label.text = item.title;
-//    label.textColor = ( selected ? self.selectedItemLabelColor : self.itemLabelColor);
     
     if(selected)
         self.selectedView = view;
@@ -472,36 +461,6 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
 
 - (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component
 {
-    // This trick does not seem to work properly.
-//    _selectedIndex = row;
-//    UIImageView *imageView;
-//    UILabel *label;
-//    
-//    if(self.selectedView != nil) {
-//        
-//        for (UIView *v in self.selectedView.subviews) {
-//            if(v.tag == 1) {
-//                imageView = (UIImageView *)v;
-//            } else if(v.tag == 2) {
-//                label = (UILabel *)v;
-//            }
-//        }
-//        
-//        imageView.tintColor = self.itemImageColor;
-//        label.textColor = self.itemLabelColor;
-//    }
-//    
-//    for (UIView *v in self.selectedView.subviews) {
-//        if(v.tag == 1) {
-//            imageView = (UIImageView *)v;
-//        } else if(v.tag == 2) {
-//            label = (UILabel *)v;
-//        }
-//    }
-    
-//    imageView.tintColor = self.selectedItemImageColor;
-//    label.textColor = self.selectedItemLabelColor;
-    
     AYSlidingPickerViewItem *selectedItem = self.items[(NSUInteger)row];
     if (self.closeOnSelection)
         [self animateSelectorClosingWithCompletion:selectedItem.handler];

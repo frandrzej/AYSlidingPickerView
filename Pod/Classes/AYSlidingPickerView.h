@@ -57,12 +57,13 @@ typedef enum {
 
 @interface AYSlidingPickerView : UIView <UIPickerViewDelegate, UIPickerViewDataSource>
 
+/**
+ Designated initializer. Sets height of the slidingPickerView. Default is 5.
+ */
+- (instancetype)initWithNumberOfVisibleItems:(NSUInteger)numberOfVisibleItems;
+
 #pragma mark Properties
 
-/**
- *  Indicates how many items should be visible, influences height of the AYSlidingPickerView.
- */
-@property (nonatomic, assign) NSInteger numberOfVisibleItems;
 /**
  *  Indicates whether or not the picker view should be closed on selection of an item.
  */
@@ -79,7 +80,6 @@ typedef enum {
  *  Font for the item labels in the picker view.
  */
 @property (nonatomic) UIFont *itemFont;
-
 /**
  *  Color for the item labels in the picker view.
  */
@@ -88,14 +88,6 @@ typedef enum {
  *  Color for the item labels in the picker view.
  */
 @property (nonatomic) UIColor *itemImageColor;
-///**
-// *  Color for the selected item labels in the picker view.
-// */
-//@property (nonatomic) UIColor *selectedItemLabelColor;
-///**
-// *  Color for the selected item labels in the picker view.sel
-// */
-//@property (nonatomic) UIColor *selectedItemImageColor;
 /**
  *  Current visible view in the window. Must be specified before showing the picker view.
  */

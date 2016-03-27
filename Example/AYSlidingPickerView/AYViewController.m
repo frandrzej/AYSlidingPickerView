@@ -53,10 +53,9 @@
         [items addObject:item];
     }
     
-    self.pickerView = [AYSlidingPickerView sharedInstance];
+    self.pickerView = [[AYSlidingPickerView alloc] initWithNumberOfVisibleItems:3];
     self.pickerView.mainView = self.view;
     self.pickerView.items = items;
-    self.pickerView.numberOfVisibleItems = 2;
     self.pickerView.selectedIndex = 0;
     self.pickerView.tintColor = [UIColor blackColor];
     self.pickerView.closeOnSelection = YES;
