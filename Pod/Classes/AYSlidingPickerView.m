@@ -50,11 +50,14 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
 @property (nonatomic) UITapGestureRecognizer *navigationBarTapGestureRecognizer;
 @property (weak, nonatomic) UINavigationBar *activeNavigationBar;
 @property (nonatomic, strong) UIView *selectedView;
+@property (nonatomic, assign) UIStatusBarStyle preferredCurrentStatusBarStyle;
 
 @end
 
 
 @implementation AYSlidingPickerView
+
+@synthesize preferredCurrentStatusBarStyle=_preferredCurrentStatusBarStyle;
 
 #pragma mark Initialization
 
@@ -69,6 +72,10 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
     if (!self) {
         return nil;
     }
+    
+    self.mainViewsStatusBarStyle = UIStatusBarStyleLightContent;
+    self.pickerViewStatusBarStyle = UIStatusBarStyleDefault;
+    self.preferredCurrentStatusBarStyle = UIStatusBarStyleLightContent;
     
     self.frame = CGRectMake(0, 0, CGRectGetWidth([UIScreen mainScreen].bounds), kSlidingPickerViewItemHeight * numberOfVisibleItems + CGRectGetHeight([UIApplication sharedApplication].statusBarFrame) + kSlidingPickerViewBounceOffset + kSlidingPickerViewExtraTopPadding);
     self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
@@ -201,6 +208,16 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
 
 #pragma mark Private
 
+-(void)setPreferredCurrentStatusBarStyle:(UIStatusBarStyle)preferredCurrentStatusBarStyle
+{
+    if(_preferredCurrentStatusBarStyle == preferredCurrentStatusBarStyle)
+        return;
+    _preferredCurrentStatusBarStyle = preferredCurrentStatusBarStyle;
+    [[UIApplication sharedApplication] setStatusBarStyle:preferredCurrentStatusBarStyle animated:YES];
+    if(self.preferredStatusBarStyleDidChange)
+        self.preferredStatusBarStyleDidChange(preferredCurrentStatusBarStyle);
+}
+
 - (void)showWithCompletion:(void (^)(BOOL))completion force:(BOOL)force {
     if (self.isDisabled) {
         return;
@@ -242,9 +259,11 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
                         viewCenter.y < (CGRectGetMidY([UIScreen mainScreen].bounds) + CGRectGetHeight(self.bounds) - kSlidingPickerViewBounceOffset)) {
                         view.center = viewCenter;
                         if (ABS(CGRectGetMidY([UIScreen mainScreen].bounds) - viewCenter.y) > CGRectGetHeight([UIApplication sharedApplication].statusBarFrame)) {
-                            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:NO];
+//                            [[UIApplication sharedApplication] setStatusBarStyle:self.mainViewsStatusBarStyle animated:NO];
+                            self.preferredCurrentStatusBarStyle = self.mainViewsStatusBarStyle;
                         } else {
-                            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:NO];
+//                            [[UIApplication sharedApplication] setStatusBarStyle:self.pickerViewStatusBarStyle animated:NO];
+                            self.preferredCurrentStatusBarStyle = self.pickerViewStatusBarStyle;
                         }
                     }
                     [gestureRecognizer setTranslation:CGPointZero inView:self.mainView];
@@ -281,7 +300,8 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
         if (self.willAppearHandler) {
             self.willAppearHandler();
         }
-        [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:NO];
+//        [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:NO];
+        self.preferredCurrentStatusBarStyle = self.mainViewsStatusBarStyle;
         [UIView animateWithDuration:0.2f animations:^{
             // Pushing the controller down
             for (UIView *view in [UIApplication sharedApplication].delegate.window.subviews) {
@@ -323,7 +343,8 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
                 }
             }
         } completion:^(BOOL completedFirst) {
-            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:YES];
+//            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:YES];
+            self.preferredCurrentStatusBarStyle = self.pickerViewStatusBarStyle;
             [UIView animateWithDuration:0.2f animations:^{
                 // Pushing the controller down
                 for (UIView *view in [UIApplication sharedApplication].delegate.window.subviews) {
@@ -349,7 +370,8 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
     if (self.willAppearHandler) {
         self.willAppearHandler();
     }
-    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:NO];
+//    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:NO];
+    self.preferredCurrentStatusBarStyle = self.mainViewsStatusBarStyle;
     CGFloat viewCenterY = CGRectGetMidY([UIScreen mainScreen].bounds) + CGRectGetHeight(self.bounds) - kSlidingPickerViewBounceOffset;
     for (UIView *view in [UIApplication sharedApplication].delegate.window.subviews) {
         if (view != self) {
@@ -373,7 +395,8 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
     if (self.willDismissHandler) {
         self.willDismissHandler();
     }
-    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:NO];
+//    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:NO];
+    self.preferredCurrentStatusBarStyle = self.pickerViewStatusBarStyle;
     for (UIView *view in [UIApplication sharedApplication].delegate.window.subviews) {
         if (view != self) {
             [UIView animateWithDuration:((view.center.y - CGRectGetMidY([UIScreen mainScreen].bounds)) / velocity) animations:^{

@@ -65,6 +65,18 @@ typedef enum {
 #pragma mark Properties
 
 /**
+ *  Sets which statusBarStyle should be applied when it's above mainView.
+ */
+@property (nonatomic, assign) UIStatusBarStyle mainViewsStatusBarStyle;
+/**
+ *  Sets which statusBarStyle should be applied when it's above pickerView.
+ */
+@property (nonatomic, assign) UIStatusBarStyle pickerViewStatusBarStyle;
+/**
+ *  Indicates which statusBarStyle should be applied, according to mainViewsStatusBarStyle and pickerViewStatusBarStyle. Useful when View controller-based status bar appearance == YES.
+ */
+@property (nonatomic, assign, readonly) UIStatusBarStyle preferredCurrentStatusBarStyle;
+/**
  *  Indicates whether or not the picker view should be closed on selection of an item.
  */
 @property (nonatomic, assign) BOOL closeOnSelection;
@@ -116,6 +128,10 @@ typedef enum {
  *  A block that will be fired after the picker view is dismissed.
  */
 @property (nonatomic, copy) void (^didDismissHandler)();
+/**
+ *  A block that will be fired when preferredCurrentStatusBarStyle changed, according to mainViewsStatusBarStyle and pickerViewStatusBarStyle. Useful when View controller-based status bar appearance == YES.
+ */
+@property (nonatomic, copy) void (^preferredStatusBarStyleDidChange)(UIStatusBarStyle preferredStyle);
 
 #pragma mark Methods
 

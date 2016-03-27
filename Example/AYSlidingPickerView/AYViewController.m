@@ -20,20 +20,28 @@
 
 #pragma mark Lifecycle
 
-- (void)viewDidLoad {
+- (void)viewDidLoad
+{
     [super viewDidLoad];
     self.navigationItem.title = @"Tap to select color";
     [self setUpPickerView];
 }
 
-- (void)viewWillAppear:(BOOL)animated {
+- (void)viewWillAppear:(BOOL)animated
+{
     [super viewWillAppear:animated];
+    
     self.navigationController.navigationBar.translucent = NO;
     self.navigationController.navigationBar.tintColor = [UIColor whiteColor];
-    self.navigationController.navigationBar.titleTextAttributes = @{
-                                                                    NSForegroundColorAttributeName : [UIColor whiteColor]
-                                                                    };
+    self.navigationController.navigationBar.titleTextAttributes = @{ NSForegroundColorAttributeName : [UIColor whiteColor] };
     [self.pickerView addGestureRecognizersToNavigationBar:self.navigationController.navigationBar];
+    [self setNeedsStatusBarAppearanceUpdate];
+}
+
+-(void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    [self setNeedsStatusBarAppearanceUpdate];
 }
 
 #pragma mark Private
@@ -61,9 +69,10 @@
     self.pickerView.closeOnSelection = YES;
     self.pickerView.itemLabelColor = [UIColor darkGrayColor];
     self.pickerView.itemImageColor = [UIColor darkGrayColor];
-//    self.pickerView.selectedItemImageColor = [UIColor blackColor];
-//    self.pickerView.selectedItemLabelColor = [UIColor blackColor];
+    self.pickerView.mainViewsStatusBarStyle = UIStatusBarStyleDefault;
+    self.pickerView.pickerViewStatusBarStyle = UIStatusBarStyleLightContent;
 
+    __weak typeof(self) weakSelf = self;
     self.pickerView.willAppearHandler = ^{
         NSLog(@"Picker is going to open!");
     };
@@ -76,10 +85,20 @@
     self.pickerView.didDismissHandler = ^{
         NSLog(@"Picker is dismissed");
     };
+    [self.pickerView setPreferredStatusBarStyleDidChange:^(UIStatusBarStyle style) {
+        [weakSelf setNeedsStatusBarAppearanceUpdate];
+    }];
     
     self.view.backgroundColor = dict[[dict allKeys][self.pickerView.selectedIndex]];
     self.navigationController.navigationBar.barTintColor = [self darkerColorForColor:self.view.backgroundColor];
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self.pickerView action:@selector(show)];
+}
+
+-(UIStatusBarStyle)preferredStatusBarStyle
+{
+    if(self.pickerView)
+        return self.pickerView.preferredCurrentStatusBarStyle;
+    return UIStatusBarStyleLightContent;
 }
 
 #pragma mark Helpers
