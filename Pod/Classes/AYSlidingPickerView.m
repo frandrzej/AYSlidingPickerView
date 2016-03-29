@@ -49,7 +49,6 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
 @property (nonatomic) UITapGestureRecognizer *mainViewTapGestureRecognizer;
 @property (nonatomic) UITapGestureRecognizer *navigationBarTapGestureRecognizer;
 @property (weak, nonatomic) UINavigationBar *activeNavigationBar;
-@property (nonatomic, strong) UIView *selectedView;
 @property (nonatomic, assign) UIStatusBarStyle preferredCurrentStatusBarStyle;
 
 @end
@@ -114,6 +113,11 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
     });
     
     return sharedInstance;
+}
+
+-(void)dealloc
+{
+    NSLog(@"dealloc");
 }
 
 #pragma mark Public
@@ -213,7 +217,7 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
     if(_preferredCurrentStatusBarStyle == preferredCurrentStatusBarStyle)
         return;
     _preferredCurrentStatusBarStyle = preferredCurrentStatusBarStyle;
-    [[UIApplication sharedApplication] setStatusBarStyle:preferredCurrentStatusBarStyle animated:YES];
+    [[UIApplication sharedApplication] setStatusBarStyle:preferredCurrentStatusBarStyle animated:NO];
     if(self.preferredStatusBarStyleDidChange)
         self.preferredStatusBarStyleDidChange(preferredCurrentStatusBarStyle);
 }
@@ -259,10 +263,8 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
                         viewCenter.y < (CGRectGetMidY([UIScreen mainScreen].bounds) + CGRectGetHeight(self.bounds) - kSlidingPickerViewBounceOffset)) {
                         view.center = viewCenter;
                         if (ABS(CGRectGetMidY([UIScreen mainScreen].bounds) - viewCenter.y) > CGRectGetHeight([UIApplication sharedApplication].statusBarFrame)) {
-//                            [[UIApplication sharedApplication] setStatusBarStyle:self.mainViewsStatusBarStyle animated:NO];
                             self.preferredCurrentStatusBarStyle = self.mainViewsStatusBarStyle;
                         } else {
-//                            [[UIApplication sharedApplication] setStatusBarStyle:self.pickerViewStatusBarStyle animated:NO];
                             self.preferredCurrentStatusBarStyle = self.pickerViewStatusBarStyle;
                         }
                     }
@@ -300,7 +302,6 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
         if (self.willAppearHandler) {
             self.willAppearHandler();
         }
-//        [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:NO];
         self.preferredCurrentStatusBarStyle = self.mainViewsStatusBarStyle;
         [UIView animateWithDuration:0.2f animations:^{
             // Pushing the controller down
@@ -343,7 +344,6 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
                 }
             }
         } completion:^(BOOL completedFirst) {
-//            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:YES];
             self.preferredCurrentStatusBarStyle = self.pickerViewStatusBarStyle;
             [UIView animateWithDuration:0.2f animations:^{
                 // Pushing the controller down
@@ -370,7 +370,6 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
     if (self.willAppearHandler) {
         self.willAppearHandler();
     }
-//    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:NO];
     self.preferredCurrentStatusBarStyle = self.mainViewsStatusBarStyle;
     CGFloat viewCenterY = CGRectGetMidY([UIScreen mainScreen].bounds) + CGRectGetHeight(self.bounds) - kSlidingPickerViewBounceOffset;
     for (UIView *view in [UIApplication sharedApplication].delegate.window.subviews) {
@@ -395,7 +394,6 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
     if (self.willDismissHandler) {
         self.willDismissHandler();
     }
-//    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:NO];
     self.preferredCurrentStatusBarStyle = self.pickerViewStatusBarStyle;
     for (UIView *view in [UIApplication sharedApplication].delegate.window.subviews) {
         if (view != self) {
@@ -434,12 +432,6 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
 
 - (UIView *)pickerView:(UIPickerView *)pickerView viewForRow:(NSInteger)row forComponent:(NSInteger)component reusingView:(UIView *)view
 {
-    CGFloat x = CGRectGetWidth(self.bounds)/2 - 100.0;
-    CGFloat horizontalPadding = 15.0f;
-    CGFloat imageViewInsets = 2.0f;
-    
-    BOOL selected = (self.selectedIndex == row);
-    
     UIImageView *imageView;
     UILabel *label;
     
@@ -448,36 +440,35 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
         
         imageView = [UIImageView new];
         imageView.contentMode = UIViewContentModeScaleAspectFill;
-        imageView.tag = 1;
         imageView.tintColor = self.itemImageColor;
         [view addSubview:imageView];
         
         label = [UILabel new];
         label.font = self.itemFont;
         label.textAlignment = NSTextAlignmentLeft;
-        label.tag = 2;
         label.textColor = self.itemLabelColor;
         [view addSubview:label];
-        
-    } else {
-        for (UIView *v in view.subviews) {
-            if(v.tag == 1) {
-                imageView = (UIImageView *)v;
-            } else if(v.tag == 2) {
-                label = (UILabel *)v;
-            }
-        }
     }
     
-    imageView.frame = CGRectMake(x + imageViewInsets, 0, kSlidingPickerViewItemHeight - imageViewInsets, kSlidingPickerViewItemHeight - imageViewInsets);
-    label.frame = CGRectMake(x + kSlidingPickerViewItemHeight + horizontalPadding, 0, CGRectGetWidth(self.bounds) - kSlidingPickerViewItemHeight - horizontalPadding, kSlidingPickerViewItemHeight);
-    
     AYSlidingPickerViewItem *item = (AYSlidingPickerViewItem *)self.items[(NSUInteger)row];
+    
+    if(item.image) {
+        CGFloat x = CGRectGetWidth(self.bounds)/2 - 100.0;
+        CGFloat horizontalPadding = 15.0f;
+        CGFloat imageViewInsets = 2.0f;
+        
+        label.textAlignment = NSTextAlignmentLeft;
+        
+        imageView.frame = CGRectMake(x + imageViewInsets, 0, kSlidingPickerViewItemHeight - imageViewInsets, kSlidingPickerViewItemHeight - imageViewInsets);
+        label.frame = CGRectMake(x + kSlidingPickerViewItemHeight + horizontalPadding, 0, CGRectGetWidth(self.bounds) - kSlidingPickerViewItemHeight - horizontalPadding, kSlidingPickerViewItemHeight);
+        
+    } else {
+        label.textAlignment = NSTextAlignmentCenter;
+        label.frame = view.bounds;
+    }
+    
     imageView.image = item.image;
     label.text = item.title;
-    
-    if(selected)
-        self.selectedView = view;
     
     return view;
 }

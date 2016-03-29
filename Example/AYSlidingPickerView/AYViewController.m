@@ -12,7 +12,14 @@
 
 @interface AYViewController ()
 
-@property (nonatomic) AYSlidingPickerView *pickerView;
+#warning Remember to remove pickerView from superView and set to nil, when no longer needed.
+
+/*
+ PickerView is added as a subView directly do UIView. This will cause a leak (not visible even to Instruments). A way to go around:
+ When is set as strong - when no longer needed (e.g. dismissing view controller), set remove pickerView from superview (main window), then set it to nil. Both are necessary for pickerView to be deallocated.
+ When is set as weak - compiler will warn you, but pointer won't go away, as long as pickerView is a subview of window. Need to call [pickerView removeFromSuperview]; to be deallocated
+ */
+@property (nonatomic, strong) AYSlidingPickerView *pickerView;
 
 @end
 
@@ -54,7 +61,8 @@
     NSMutableArray *items = [[NSMutableArray alloc] initWithCapacity:dict.count];
     
     for (NSString *key in [dict allKeys]) {
-        AYSlidingPickerViewItem *item = [[AYSlidingPickerViewItem alloc] initWithTitle:key image:[UIImage imageNamed:key] handler:^(BOOL completed) {
+//        AYSlidingPickerViewItem *item = [[AYSlidingPickerViewItem alloc] initWithTitle:key image:[UIImage imageNamed:key] handler:^(BOOL completed) {
+        AYSlidingPickerViewItem *item = [[AYSlidingPickerViewItem alloc] initWithTitle:key image:nil handler:^(BOOL completed) {
             self.view.backgroundColor = dict[key];
             self.navigationController.navigationBar.barTintColor = [self darkerColorForColor:self.view.backgroundColor];
         }];
@@ -92,6 +100,23 @@
     self.view.backgroundColor = dict[[dict allKeys][self.pickerView.selectedIndex]];
     self.navigationController.navigationBar.barTintColor = [self darkerColorForColor:self.view.backgroundColor];
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self.pickerView action:@selector(show)];
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(cancel:)];
+}
+
+-(void)cancel:(id)sender
+{
+    if(self.pickerView.state != AYSlidingPickerViewClosedState) {
+        __weak typeof(self) weakSelf = self;
+        [self.pickerView dismissWithCompletion:^(BOOL completed) {
+            [weakSelf.pickerView removeFromSuperview];
+            weakSelf.pickerView = nil;
+            [weakSelf.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+        }];
+    } else {
+        [self.pickerView removeFromSuperview];
+        self.pickerView = nil;
+        [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+    }
 }
 
 -(UIStatusBarStyle)preferredStatusBarStyle
