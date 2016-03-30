@@ -115,11 +115,6 @@ static CGFloat const kSlidingPickerViewItemHeight = 30;
     return sharedInstance;
 }
 
--(void)dealloc
-{
-    NSLog(@"dealloc");
-}
-
 #pragma mark Public
 
 - (void)show {
